@@ -258,18 +258,20 @@
 		$row[3] = truncate($row[3], 30);
 		$row[4] = truncate($row[4], 100);
 	?>
-	<tr>
-        <td class="center" bgcolor="<?= $colour ?>"><?= $row[2] ?></td>
-        <td class="center" bgcolor="<?= $colour ?>"><?= $row[3] ?></td>
-		<?php
-		echo "<td class=\"center\" bgcolor=\" $colour\"><a href=\"view_email.php?id={$row[1]}\" target=\"_blank\">{$row[4]}</a></td>";
-		?>
-        <td class="center" bgcolor="<?= $colour ?>"><?= $row[6] ?></td>
+
+	<tr bgcolor="<?= $colour ?>">
+        <td class="center"><?= $row[2] ?></td>
+        <td class="center"><?= $row[3] ?></td>
+	<td class="center"><a href="view_email.php?id=<?= $row[1] ?>" target="_blank">{$row[4]}</a></td>
+        <td class="center"><?= $row[6] ?></td>
 	</tr>
-	<?php
+
+        <?php
 	}
 	?>
 </table>
+
+
 <?php
 	echo "<div class=\"pagination\">";
     if ($currentPage > 1) {
