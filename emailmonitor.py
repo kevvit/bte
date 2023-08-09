@@ -37,10 +37,11 @@ def save_current_timestamp():  # Save the current date and time to the emailmoni
     except FileNotFoundError:
         print("emailmonitorlog.txt missing")
 
+# Get the body of differently encoded emails
 def get_email_body(email_message):
     def get_charset():
         charset = email_message.get_charset()
-        return charset if charset else 'utf-8'
+        return charset if charset else 'utf-8'  # Default charset
 
     if email_message.is_multipart():
         for part in email_message.walk():
@@ -93,10 +94,12 @@ except MySQLdb.OperationalError:
 
 cursor = conn.cursor()
 
+# Use mail credentials to log in
 mail = imaplib.IMAP4_SSL(imap_server)
 mail.login(email_address, password)
 mail.select(mailbox)
 
+# If this program is running for the first time (emailmonitoring.txt is blank, retrieve all emails.)
 from_date = get_last_run_timestamp()
 if from_date is None:
     from_date = "01-Jan-1970"
@@ -148,6 +151,7 @@ for uid in uids[0].split():
 
         if affected_rows > 0:
             count += 1
+            # Print information of email(s) saved
             print("Saved (", count, ") - ", sendername, " | ", senderaddr, " | ", email_date, " | ", email_subject[:20], "... | ", email_body.replace("\n", " ")[:20], "...")
     except Exception as e:
         print(f"An error occured: {e}")

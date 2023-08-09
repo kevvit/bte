@@ -1,6 +1,6 @@
 <?php
 	session_start();
-
+	# Saved information from the session to maintain search queries
 	function getSessionValue($field) {
 		if (isset($_SESSION[$field])) {
 			$input = $_SESSION[$field];
@@ -59,6 +59,7 @@
 
 	if ($_POST) {
 		if(isset($_POST['clearbtn'])) {
+			# Clear all search queries and reset page
 			$_POST['sender'] = '';
 			$_POST['address'] = '';
 			$_POST['title'] = '';
@@ -70,6 +71,7 @@
 			$_SESSION['beforedate'] = '';
 			$_SESSION['afterdate'] = '';
 		} elseif (isset($_POST['searchbtn'])) {
+			# Add queries to filter and retrieve select emails
 			$sender = getPostValue('sender');
 			$sql = $sql . " AND sendername LIKE '%" . $sender . "%'";
 
@@ -257,15 +259,16 @@
 		$row[3] = truncate($row[3], 30);
 		$row[4] = truncate($row[4], 100);
 	?>
-	<tr>
-        <td class="center" bgcolor="<?= $colour ?>"><?= $row[2] ?></td>
-        <td class="center" bgcolor="<?= $colour ?>"><?= $row[3] ?></td>
+	<tr bgcolor="<?= $colour ?>">
+		<td class="center"><?= $row[2] ?></td>
+        <td class="center"><?= $row[3] ?></td>
 		<?php
 		$encoded_uid = base64_encode($row[1]);
-		echo "<td class=\"center\" bgcolor=\" $colour\"><a href=\"view_email.php?id={$encoded_uid}\" target=\"_blank\">{$row[4]}</a></td>";
 		?>
+		<td class="center"><a href="view_email.php?id=<?= $encoded_uid ?>" target="_blank"><?= $row[4] ?></a></td>
         <td class="center" bgcolor="<?= $colour ?>"><?= $row[6] ?></td>
 	</tr>
+
 	<?php
 	}
 	?>
