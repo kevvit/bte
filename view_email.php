@@ -11,10 +11,10 @@
             die("Connection failed: " . $conn->connect_error);
         } 
         
-        $emailuid = $_GET['id'];
+        $emailuid = base64_decode($_GET['id']);
 
 
-        $sql = "SELECT * FROM emails WHERE emailuid = \"" . $emailuid . "\"";
+        $sql = "SELECT * FROM emails WHERE emailuid LIKE \"" . $emailuid . "%\"";
         $info = array();
         $result = $conn->query($sql);
         if ($result === false) {
@@ -23,6 +23,8 @@
             while ($row = $result->fetch_assoc()) {
                 array_push($info, array($row["id"], $row["emailuid"], $row["sendername"], $row["senderaddr"], $row["title"], $row["body"], $row["date"]));
             }
+        } else {
+            echo "<h1> EMAIL NOT FOUND: </h1>" . $sql;
         }
     } else {
         echo "<h1> ERROR </h1>";
