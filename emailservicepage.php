@@ -122,7 +122,11 @@
 			
 			foreach ($emailIds as $emailId) {
 				$emailId = substr($emailId, 0, -1);
-				$sql = "UPDATE emailsort SET status = '$status' WHERE id LIKE '$emailId%'";
+				if ($status == "Refund" || $status == "Cancel") {
+					$sql = "UPDATE emailsort SET type = '$status' WHERE id LIKE '$emailId%'";
+				} else {
+					$sql = "UPDATE emailsort SET status = '$status' WHERE id LIKE '$emailId%'";
+				}
 				$result = $conn->query($sql);
 				if (!$result) {
 					echo "Error: " . $sql . "<br>" . $conn->error."<br/>";
@@ -258,6 +262,38 @@
 	} );
 </script>
 <script>
+	function markRefunds() {
+		var checkboxes = document.querySelectorAll('input[name="emailCheckbox"]:checked');
+		var emailIds = [];
+		var type = "Refund";
+
+		emailIds.push(type);
+		
+		checkboxes.forEach(function(checkbox) {
+			var row = checkbox.closest('tr');
+			var emailId = row.cells[0].innerText;
+			emailIds.push(emailId);
+		});
+
+		// Set the emailIds array in the hidden input field
+		document.getElementById('emailIdsInput').value = JSON.stringify(emailIds);
+	}
+	function markCancels() {
+		var checkboxes = document.querySelectorAll('input[name="emailCheckbox"]:checked');
+		var emailIds = [];
+		var type = "Cancel";
+
+		emailIds.push(type);
+		
+		checkboxes.forEach(function(checkbox) {
+			var row = checkbox.closest('tr');
+			var emailId = row.cells[0].innerText;
+			emailIds.push(emailId);
+		});
+
+		// Set the emailIds array in the hidden input field
+		document.getElementById('emailIdsInput').value = JSON.stringify(emailIds);
+	}
 	function markPending() {
 		var checkboxes = document.querySelectorAll('input[name="emailCheckbox"]:checked');
 		var emailIds = [];
@@ -322,6 +358,8 @@
    <input type="submit" name="clearbtn" value="Clear Filters" id="clearbtn" />
 	<br><br>
 	<input type="hidden" id="emailIdsInput" name="emailIds" value="">
+	<button style = "background-color: #ccffcc" type="submit" onclick="markRefunds()">Mark selected as Refunds</button>
+	<button style = "background-color: #ff9999" onclick="markCancels()">Mark selected as Cancels</button>
 	<button onclick="markPending()">Mark selected as Pending</button><br><br>
 	<b>Closed By (NAME):</b> <input name="closedby" type="text" style="height:25pt;width:100pt;" value="<?php echo isset($_POST['closedby']) ? $_POST['closedby'] : '' ?>">
 	<button onclick="markClosed()">Mark selected as Closed</button>
