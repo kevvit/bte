@@ -66,14 +66,14 @@
 			$_POST['beforedate'] = '';
 			$_POST['afterdate'] = '';
 			$_POST['emailtype'] = '';
-			$_POST['status'] = '';
+			$_POST['emailstatus'] = '';
 			$_SESSION['sender'] = '';
 			$_SESSION['address'] = '';
 			$_SESSION['title'] = '';
 			$_SESSION['beforedate'] = '';
 			$_SESSION['afterdate'] = '';
 			$_SESSION['emailtype'] = '';
-			$_SESSION['status'] = '';
+			$_SESSION['emailstatus'] = '';
 			
 			header("Location: emailservicepage.php?page=1");
 		} elseif (isset($_POST['searchbtn'])) {
@@ -96,7 +96,7 @@
 			$emailtype = getPostValue('emailtype');
 			$sql = $sql . " AND type LIKE '%" . $emailtype . "%'";
 
-			$status = getPostValue('status');
+			$status = getPostValue('emailstatus');
 			$sql = $sql . " AND status LIKE '%" . $status . "%'";
 			
 			header("Location: emailservicepage.php?page=1");
@@ -104,32 +104,33 @@
 		} elseif (isset($_POST['emailIds'])) {
 			$emailIds = json_decode($_POST['emailIds'], true);
 			$status = array_shift($emailIds);
-			$namegiven = true;
 			if ($status == "Closed") {
 				if (isset($_POST['closedby'])) {
 					$closedby = $_POST['closedby'] ?? '';
 					if ($closedby == '') {
 						echo "<script>alert('Name required');</script>";
-						$namegiven = false;
+						echo '<script>window.location.href = "emailservicepage.php?page=' . $currentPage . '";</script>';
+						exit(1);
 					}
 					$status = $status . " by $closedby";
 				} else {
 					echo "<script>alert('Name required');</script>";
-					$namegiven = false;
-				}
-			}
-			if ($namegiven) {
-				foreach ($emailIds as $emailId) {
-					$emailId = substr($emailId, 0, -1);
-					$sql = "UPDATE emailsort SET status = '$status' WHERE id LIKE '$emailId%'";
-					$result = $conn->query($sql);
-					if (!$result) {
-						echo "Error: " . $sql . "<br>" . $conn->error."<br/>";
-					} 
-					$sql = "SELECT * FROM emailsort WHERE NOT id = 0";
+					echo '<script>window.location.href = "emailservicepage.php?page=' . $currentPage . '";</script>';
+					exit(1);
 				}
 			}
 			
+			foreach ($emailIds as $emailId) {
+				$emailId = substr($emailId, 0, -1);
+				$sql = "UPDATE emailsort SET status = '$status' WHERE id LIKE '$emailId%'";
+				$result = $conn->query($sql);
+				if (!$result) {
+					echo "Error: " . $sql . "<br>" . $conn->error."<br/>";
+				} 
+				$sql = "SELECT * FROM emailsort WHERE NOT id = 0";
+			}
+
+			header("Location: emailservicepage.php?page=$currentPage");
 		}
 	} else {
 		$_POST['sender'] = getSessionValue('sender');
@@ -138,7 +139,7 @@
 		$_POST['beforedate'] = getSessionValue('beforedate');
 		$_POST['afterdate'] = getSessionValue('afterdate');
 		$_POST['emailtype'] = getSessionValue('emailtype');
-		$_POST['status'] = getSessionValue('status');
+		$_POST['emailstatus'] = getSessionValue('emailstatus');
 		
 
 		$sender = getSessionValue('sender');
@@ -159,7 +160,7 @@
 		$emailtype = getSessionValue('emailtype');
 		$sql = $sql . " AND type LIKE '%" . $emailtype . "%'";
 		
-		$status = getPostValue('status');
+		$status = getPostValue('emailstatus');
 		$sql = $sql . " AND status LIKE '%" . $status . "%'";
 	}
 
@@ -311,11 +312,11 @@
 	   <option <?php if (isset($emailtype) && $emailtype=="Refund") echo "selected";?> value="Refund">Refund</option>
 	   <option <?php if (isset($emailtype) && $emailtype=="Cancel") echo "selected";?> value="Cancel">Cancel</option>
    </select> 
-   <b>Status:</b> <select name="status" style="height:25pt;width:100pt;">
+   <b>Status:</b> <select name="emailstatus" style="height:25pt;width:100pt;">
 	   <option value=""></option>
-	   <option <?php if (isset($status) && $status=="Open") echo "selected";?> value="Open">Open</option>
-	   <option <?php if (isset($status) && $status=="Pending") echo "selected";?> value="Pending">Pending</option>
-	   <option <?php if (isset($status) && $status=="Closed") echo "selected";?> value="Closed">Closed</option>
+	   <option <?php if (isset($emailstatus) && $emailstatus=="Open") echo "selected";?> emailstatus="Open">Open</option>
+	   <option <?php if (isset($emailstatus) && $emailstatus=="Pending") echo "selected";?> emailstatus="Pending">Pending</option>
+	   <option <?php if (isset($emailstatus) && $emailstatus=="Closed") echo "selected";?> emailstatus="Closed">Closed</option>
    </select> 
    <input type="submit" name="searchbtn" value="Search" id="searchbtn" />
    <input type="submit" name="clearbtn" value="Clear Filters" id="clearbtn" />
