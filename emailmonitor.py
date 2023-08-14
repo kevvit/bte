@@ -79,6 +79,7 @@ def get_email_body(email_message):
             return text.decode(encoding, 'replace')
 
     # Get the entire HTML email body if available
+    email_body = ''
     if email_message.is_multipart():
         for part in email_message.walk():
             content_type = part.get_content_type()
@@ -160,8 +161,8 @@ for uid in uids[0].split():
 
     # Print or save the extracted data to the SQL database.
     # Perform SQL database operations here.
-    sql = "INSERT IGNORE INTO emails (emailuid, sendername, senderaddr, title, body, bodyoriginal, date) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-    data = (email_id, sendername, senderaddr, email_subject, email_body, email_message["body"], email_date)
+    sql = "INSERT IGNORE INTO emails (emailuid, sendername, senderaddr, title, body, date) VALUES (%s, %s, %s, %s, %s, %s)"
+    data = (email_id, sendername, senderaddr, email_subject, email_body, email_date)
 
     # Execute the INSERT query
     try:
