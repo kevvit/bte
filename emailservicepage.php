@@ -55,7 +55,7 @@
 	$emailsPerPage = 20;
 	$startIndex = ($currentPage - 1) * $emailsPerPage;
 
-	$sql = "SELECT * FROM emails WHERE NOT id = 0";
+	$sql = "SELECT * FROM emailsort WHERE NOT id = 0";
 
 	if ($_POST) {
 		if(isset($_POST['clearbtn'])) {
@@ -65,13 +65,17 @@
 			$_POST['title'] = '';
 			$_POST['beforedate'] = '';
 			$_POST['afterdate'] = '';
+			$_POST['emailtype'] = '';
+			$_POST['status'] = '';
 			$_SESSION['sender'] = '';
 			$_SESSION['address'] = '';
 			$_SESSION['title'] = '';
 			$_SESSION['beforedate'] = '';
 			$_SESSION['afterdate'] = '';
+			$_SESSION['emailtype'] = '';
+			$_SESSION['status'] = '';
 			
-			header("Location: emailmonitorpage.php?page=1");
+			header("Location: emailservicepage.php?page=1");
 		} elseif (isset($_POST['searchbtn'])) {
 			# Add queries to filter and retrieve select emails
 			$sender = getPostValue('sender');
@@ -89,47 +93,43 @@
 			$afterdate = getPostValue('afterdate');
 			if ($afterdate != '') $sql = $sql . " AND DATE(date) >= '" . $afterdate . "'";
 			
-			header("Location: emailmonitorpage.php?page=1");
+			$emailtype = getPostValue('emailtype');
+			$sql = $sql . " AND type LIKE '%" . $emailtype . "%'";
+
+			$status = getPostValue('status');
+			$sql = $sql . " AND status LIKE '%" . $status . "%'";
+			
+			header("Location: emailservicepage.php?page=1");
 			
 		} elseif (isset($_POST['emailIds'])) {
 			$emailIds = json_decode($_POST['emailIds'], true);
-			$type = array_shift($emailIds);
-			foreach ($emailIds as $emailId) {
-				$sql = "SELECT * FROM emails WHERE id LIKE '$emailId%'";
-				$result = $conn->query($sql);
-				if (!$result) {
-					echo "Error: " . $sql . "<br>" . $conn->error."<br/>";
-				} elseif ($result->num_rows > 0) {
-					$info = array();
-					while ($row = $result->fetch_assoc()) {
-						array_push($info, array($row["id"], $row["emailuid"], $row["sendername"], $row["senderaddr"], $row["title"], $row["body"], $row["date"]));
+			$status = array_shift($emailIds);
+			$namegiven = true;
+			if ($status == "Closed") {
+				if (isset($_POST['closedby'])) {
+					$closedby = $_POST['closedby'] ?? '';
+					if ($closedby == '') {
+						echo "<script>alert('Name required');</script>";
+						$namegiven = false;
 					}
-					$row = $info[0];
-					$emailuid = $row[1];
-					$sender = $row[2];
-					$senderaddr = $row[3];
-					$title = $row[4];
-					$body = $row[5];
-					$date = $row[6];
-					
-					$sql = "INSERT INTO emailsort (emailuid, sendername, senderaddr, title, body, date, type, status, closedby) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON 
-					DUPLICATE KEY UPDATE type = ?";
-					$stmt = $conn->prepare($sql);
-					
-					$status = "Open";
-					$closedby = '';
-					$stmt->bind_param("ssssssssss", $emailuid, $sender, $senderaddr, $title, $body, $date, $type, $status, $closedby, $type);
-					
-					$stmt->execute();
-					
-					$sql = "UPDATE emails SET type = '$type' WHERE id LIKE '$emailId%'";
+					$status = $status . " by $closedby";
+				} else {
+					echo "<script>alert('Name required');</script>";
+					$namegiven = false;
+				}
+			}
+			if ($namegiven) {
+				foreach ($emailIds as $emailId) {
+					$emailId = substr($emailId, 0, -1);
+					$sql = "UPDATE emailsort SET status = '$status' WHERE id LIKE '$emailId%'";
 					$result = $conn->query($sql);
 					if (!$result) {
 						echo "Error: " . $sql . "<br>" . $conn->error."<br/>";
-					}
-					$sql = "SELECT * FROM emails WHERE NOT id = 0";
+					} 
+					$sql = "SELECT * FROM emailsort WHERE NOT id = 0";
 				}
 			}
+			
 		}
 	} else {
 		$_POST['sender'] = getSessionValue('sender');
@@ -137,6 +137,8 @@
 		$_POST['title'] = getSessionValue('title');
 		$_POST['beforedate'] = getSessionValue('beforedate');
 		$_POST['afterdate'] = getSessionValue('afterdate');
+		$_POST['emailtype'] = getSessionValue('emailtype');
+		$_POST['status'] = getSessionValue('status');
 		
 
 		$sender = getSessionValue('sender');
@@ -153,16 +155,22 @@
 
 		$afterdate = getSessionValue('afterdate');
 		if ($afterdate != '') $sql = $sql . " AND DATE(date) >= '" . $afterdate . "'";
+
+		$emailtype = getSessionValue('emailtype');
+		$sql = $sql . " AND type LIKE '%" . $emailtype . "%'";
+		
+		$status = getPostValue('status');
+		$sql = $sql . " AND status LIKE '%" . $status . "%'";
 	}
 
-	$sql = $sql . " ORDER BY date DESC LIMIT " . $emailsPerPage . " OFFSET " . $startIndex;
+	$sql = $sql . " ORDER BY status DESC, date ASC LIMIT " . $emailsPerPage . " OFFSET " . $startIndex;
 	$info = array();
 	$result = $conn->query($sql);
 	if ($result === false) {
 		echo "Error: " . $sql . "<br>" . $conn->error."<br/>";
 	} elseif ($result->num_rows > 0) {
 		while ($row = $result->fetch_assoc()) {
-			array_push($info, array($row["id"], $row["emailuid"], $row["sendername"], $row["senderaddr"], $row["title"], $row["body"], $row["type"], $row["date"]));
+			array_push($info, array($row["id"], $row["emailuid"], $row["sendername"], $row["senderaddr"], $row["title"], $row["body"], $row["type"], $row['status'], $row["date"]));
 		}
 	}
 	
@@ -188,7 +196,7 @@
 
 <html>
 <head>
-<title>Emails</title>
+<title>Emails SERVICE</title>
 <style>
   body { width: 1660px; margin: 0 auto; }
   table { border-collapse: collapse; width: 100%; }
@@ -249,10 +257,10 @@
 	} );
 </script>
 <script>
-	function markRefunds() {
+	function markPending() {
 		var checkboxes = document.querySelectorAll('input[name="emailCheckbox"]:checked');
 		var emailIds = [];
-		var type = "Refund";
+		var type = "Pending";
 		emailIds.push(type);
 
 		checkboxes.forEach(function(checkbox) {
@@ -264,10 +272,10 @@
 		// Set the emailIds array in the hidden input field
 		document.getElementById('emailIdsInput').value = JSON.stringify(emailIds);
 	}
-	function markCancels() {
+	function markClosed() {
 		var checkboxes = document.querySelectorAll('input[name="emailCheckbox"]:checked');
 		var emailIds = [];
-		var type = "Cancel";
+		var type = "Closed";
 
 		emailIds.push(type);
 		
@@ -285,7 +293,7 @@
 </head>
 <body>
 <br>
-<h1>Inbox</h1>
+<h1>Orders</h1>
 
 
 <!-- SEARCH TABLE -->
@@ -296,15 +304,26 @@
 	<b>Sender:</b> <input name="sender" type="text" style="height:25pt;width:100pt;" value="<?php echo isset($_POST['sender']) ? $_POST['sender'] : '' ?>">
    	<b>Address:</b> <input name="address" type="text" style="height:25pt;width:100pt;" value="<?php echo isset($_POST['address']) ? $_POST['address'] : '' ?>">
   	<b> Title: </b> <input name="title" type="text" style="height:25pt;width:100pt;" value="<?php echo isset($_POST['title']) ? $_POST['title'] : '' ?>">
-	<b> After (MM/DD/YYYY):	</b> <input name="afterdate" class="datepicker" style="height:25pt;width:100pt;" value="<?php echo isset($_POST['afterdate']) ? $_POST['afterdate'] : '' ?>">
-  	<b> Before (MM/DD/YYYY):	</b> <input name="beforedate" class="datepicker" style="height:25pt;width:100pt;" value="<?php echo isset($_POST['beforedate']) ? $_POST['beforedate'] : '' ?>">
-  	
+	<b> After:	</b> <input name="afterdate" class="datepicker" style="height:25pt;width:100pt;" value="<?php echo isset($_POST['afterdate']) ? $_POST['afterdate'] : '' ?>">
+  	<b> Before:	</b> <input name="beforedate" class="datepicker" style="height:25pt;width:100pt;" value="<?php echo isset($_POST['beforedate']) ? $_POST['beforedate'] : '' ?>">
+  	<b>Type:</b> <select name="emailtype" style="height:25pt;width:100pt;">
+	   <option value=""></option>
+	   <option <?php if (isset($emailtype) && $emailtype=="Refund") echo "selected";?> value="Refund">Refund</option>
+	   <option <?php if (isset($emailtype) && $emailtype=="Cancel") echo "selected";?> value="Cancel">Cancel</option>
+   </select> 
+   <b>Status:</b> <select name="status" style="height:25pt;width:100pt;">
+	   <option value=""></option>
+	   <option <?php if (isset($status) && $status=="Open") echo "selected";?> value="Open">Open</option>
+	   <option <?php if (isset($status) && $status=="Pending") echo "selected";?> value="Pending">Pending</option>
+	   <option <?php if (isset($status) && $status=="Closed") echo "selected";?> value="Closed">Closed</option>
+   </select> 
    <input type="submit" name="searchbtn" value="Search" id="searchbtn" />
    <input type="submit" name="clearbtn" value="Clear Filters" id="clearbtn" />
 	<br><br>
 	<input type="hidden" id="emailIdsInput" name="emailIds" value="">
-	<button style = "background-color: #ccffcc" type="submit" onclick="markRefunds()">Mark selected as Refunds</button>
-	<button style = "background-color: #ff9999" onclick="markCancels()">Mark selected as Cancels</button>
+	<button onclick="markPending()">Mark selected as Pending</button><br><br>
+	<b>Closed By (NAME):</b> <input name="closedby" type="text" style="height:25pt;width:100pt;" value="<?php echo isset($_POST['closedby']) ? $_POST['closedby'] : '' ?>">
+	<button onclick="markClosed()">Mark selected as Closed</button>
 </form>
 </td>
 </tr>
@@ -319,23 +338,30 @@
       <th>Sender</th>
 	  <th>Address</th>
 	  <th>Title</th>
+	  <th>Status</th>
 	  <th>Date</th>
 	  <th></th>
     </tr>
 	
 	<?php
 	// Set the background color of the table
-	
 	foreach ($info as $row){
 		$row[2] = truncate($row[2], 30);
 		$row[3] = truncate($row[3], 30);
-		$row[4] = truncate($row[4], 100);
+		$row[4] = truncate($row[4], 50);
 		if ($row[6] == "Refund") {
+			$row[0] = $row[0] . "R";
 			$colour = "#ccffcc";
 		} elseif ($row[6] == "Cancel") {
+			$row[0] = $row[0] . "C";
 			$colour = "#ff9999";
 		} else {
 			$colour = "#c3cde6";
+		}
+		if ($row[7] == "Pending") {
+			$colour = "#ffffcc";
+		} elseif ($row[7] != "Open") {
+			$colour = '#c3cde6';
 		}
 	?>
 	<tr bgcolor="<?= $colour ?>">
@@ -347,6 +373,7 @@
 		?>
 		<td class="center"><a href="view_email.php?id=<?= $encoded_uid ?>" target="_blank"><?= $row[4] ?></a></td>
         <td class="center" bgcolor="<?= $colour ?>"><?= $row[7] ?></td>
+        <td class="center" bgcolor="<?= $colour ?>"><?= $row[8] ?></td>
 		<td><input type="checkbox" name="emailCheckbox"></td>
 	</tr>
 
@@ -358,7 +385,7 @@
 	echo "<div class=\"pagination\">";
     if ($currentPage > 1) {
         $prevPage = $currentPage - 1;
-        echo "<a href=\"emailmonitorpage.php?page={$prevPage}\">◄ Previous</a>";
+        echo "<a href=\"emailservicepage.php?page={$prevPage}\">◄ Previous</a>";
     }
 
 	$minPage = max(1, $currentPage - 2);
@@ -368,20 +395,20 @@
         if ($page == $currentPage) {
             echo "<span class=\"current-page\">$page</span>";
         } else {
-            echo "<a href=\"emailmonitorpage.php?page={$page}\">$page</a>";
+            echo "<a href=\"emailservicepage.php?page={$page}\">$page</a>";
         }
     }
 
 	if ($currentPage < $totalPages) {
         $nextPage = $currentPage + 1;
-        echo "<a href=\"emailmonitorpage.php?page={$nextPage}\">Next ►</a>";
+        echo "<a href=\"emailservicepage.php?page={$nextPage}\">Next ►</a>";
     }
 
 	echo "</div>";
 
     // Add option to go to a specific page below the numerical pages
     echo "<div class=\"go-form\">";
-    echo "<form action=\"emailmonitorpage.php\" method=\"get\">";
+    echo "<form action=\"emailservicepage.php\" method=\"get\">";
     echo "<input type=\"number\" name=\"page\" min=\"1\" max=\"{$totalPages}\" class=\"go-input\" placeholder=\"Go to page\">";
     echo "<input type=\"submit\" value=\"Go\" class=\"go-btn\">";
     echo "</form>";

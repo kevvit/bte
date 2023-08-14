@@ -39,6 +39,7 @@ def save_current_timestamp():  # Save the current date and time to the emailmoni
 
 # Get the body of differently encoded emails
 def get_email_body(email_message):
+    """
     def get_charset():
         charset = email_message.get_charset()
         return charset if charset else 'utf-8'  # Default charset
@@ -69,6 +70,25 @@ def get_email_body(email_message):
             email_body = email_message.get_payload(decode=True).decode(detected_charset)
 
     return email_body
+    """
+    # Function to handle decoding with replacement for invalid characters
+    def safe_decode(text, encoding='utf-8'):
+        try:
+            return text.decode(encoding)
+        except UnicodeDecodeError:
+            return text.decode(encoding, 'replace')
+
+    # Get the entire HTML email body if available
+    if email_message.is_multipart():
+        for part in email_message.walk():
+            content_type = part.get_content_type()
+            if "text/html" in content_type:
+                email_body = safe_decode(part.get_payload(decode=True))
+                break
+    else:
+        email_body = safe_decode(email_message.get_payload(decode=True))
+    return email_body
+
 
 config = configparser.ConfigParser()
 config.read("config.ini")
@@ -140,8 +160,8 @@ for uid in uids[0].split():
 
     # Print or save the extracted data to the SQL database.
     # Perform SQL database operations here.
-    sql = "INSERT IGNORE INTO emails (emailuid, sendername, senderaddr, title, body, date) VALUES (%s, %s, %s, %s, %s, %s)"
-    data = (email_id, sendername, senderaddr, email_subject, email_body, email_date)
+    sql = "INSERT IGNORE INTO emails (emailuid, sendername, senderaddr, title, body, bodyoriginal, date) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+    data = (email_id, sendername, senderaddr, email_subject, email_body, email_message["body"], email_date)
 
     # Execute the INSERT query
     try:
@@ -157,7 +177,7 @@ for uid in uids[0].split():
         print(f"An error occured: {e}")
         conn.rollback()
     
-    #if count >= 50: break      # Limit to this many emails to save
+    # if count >= 50: break      # Limit to this many emails to save
 
 if count == 0: print ("No new emails found.")
 
