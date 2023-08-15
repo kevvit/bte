@@ -50,7 +50,7 @@
         $closedby = '';
 
         $ordernum = '####';
-        $pattern = '/\d{3}-\d{7}-\d{7}/';
+        $pattern = '/\b\d{3}-\d{7}-\d{7}\b|\b\d{9}-A\b/';
         $cleanedHtmlContent = str_replace(['<o:p>', '</o:p>'], '', $body);
         $dom = new DOMDocument();
         $dom->loadHTML(htmlspecialchars($cleanedHtmlContent));
