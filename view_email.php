@@ -1,4 +1,6 @@
 <?php
+
+
     if (isset($_GET['id'])) {
         $config = parse_ini_file('config.ini');
         $servername = $config['db_host'];
@@ -13,7 +15,7 @@
         
         $emailuid = base64_decode($_GET['id']);
 
-
+        # Find the email with the uid as decoded from the url
         $sql = "SELECT * FROM emails WHERE emailuid LIKE \"" . $emailuid . "%\"";
         $info = array();
         $result = $conn->query($sql);
@@ -21,7 +23,7 @@
             echo "Error: " . $sql . "<br>" . $conn->error."<br/>";
         } elseif ($result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
-                array_push($info, array($row["id"], $row["emailuid"], $row["sendername"], $row["senderaddr"], $row["title"], $row["body"], $row["date"]));
+                array_push($info, array($row["id"], $row["emailuid"], $row["sendername"], $row["senderaddr"], $row["title"], $row["body"], $row["date"], $row["type"]));
             }
         } else {
             echo "<h1> EMAIL NOT FOUND: </h1>" . $sql;
@@ -30,6 +32,43 @@
         echo "<h1> ERROR </h1>";
         echo "<p>No email ID specified. Use emailmonitorpage.php</p>";
     }
+    
+    function updateEmailType($type, $conn, $emailuid, $row) {
+        $sql = "UPDATE emails SET type = '$type' WHERE emailuid LIKE '$emailuid%'";
+        $result = $conn->query($sql);
+        if ($result === false) {
+            echo "Error: " . $sql . "<br>" . $conn->error."<br/>";
+        }
+
+        $emailuid = $row[1];
+        $sender = $row[2];
+        $senderaddr = $row[3];
+        $title = $row[4];
+        $body = $row[5];
+        $date = $row[6];
+        $status = "Open";
+        $closedby = '';
+        
+        $sql = "INSERT INTO emailsort (emailuid, sendername, senderaddr, title, body, date, type, status, closedby) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON 
+        DUPLICATE KEY UPDATE type = ?";
+        $stmt = $conn->prepare($sql);
+        
+        $stmt->bind_param("ssssssssss", $emailuid, $sender, $senderaddr, $title, $body, $date, $type, $status, $closedby, $type);
+        
+        $stmt->execute();
+    }
+
+    if ($_POST) {
+        if (isset($_POST['markrefund'])) {
+            updateEmailType("Refund", $conn, $emailuid, $info[0]);
+        } elseif (isset($_POST['markcancel'])) {
+            updateEmailType("Cancel", $conn, $emailuid, $info[0]);
+        }
+        $currentUrl = $_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING'];
+        header("Location: ". $currentUrl);
+        exit();
+    } 
+    
     
 
 ?>
@@ -69,10 +108,21 @@
 	
 	$colour = "#c3cde6";
 	foreach ($info as $row){
+        if ($row[7] == "Refund") {
+            $row[4] = $row[4] . " (REFUND)";
+        } elseif ($row[7] == "Cancel") {
+            $row[4] = $row[4] . " (CANCEL)";
+        }
 		echo "<h1> " . $row[4] . "</h1>";
 		echo "<h3> " . $row[2] . "</h3>";
 		echo "<h3> " . $row[3] . "</h3>";
 		echo "<h3> " . $row[6] . "</h3>";
+        ?> 
+        <form name="buttonForm" method="POST">
+            <input style = "background-color: #ccffcc" type="submit" name="markrefund" value="Mark as Refund" id="markrefund" />
+            <input style = "background-color: #ff9999" type="submit" name="markcancel" value="Mark as Cancel" id="markcancel" />
+        </form>
+        <?php
         echo "<title>" . $row[4] . "</title>";
 	?>
 	<tr>
