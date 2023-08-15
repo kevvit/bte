@@ -29,9 +29,10 @@ CREATE TABLE IF NOT EXISTS `emails` (
   `body` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
   `type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `date` datetime DEFAULT NULL,
+  `note` text,
   PRIMARY KEY (`id`),
   UNIQUE KEY `emailid` (`emailuid`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1816 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Email information from support@onedealoutlet.com';
+) ENGINE=InnoDB AUTO_INCREMENT=2365 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Email information from support@onedealoutlet.com';
 
 -- Data exporting was unselected.
 
@@ -47,9 +48,10 @@ CREATE TABLE IF NOT EXISTS `emailsort` (
   `type` varchar(50) DEFAULT NULL,
   `status` varchar(50) DEFAULT NULL,
   `closedby` varchar(100) DEFAULT NULL,
+  `ordernum` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `emailuid` (`emailuid`)
-) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=80 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Data exporting was unselected.
 

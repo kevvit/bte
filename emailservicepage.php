@@ -10,6 +10,7 @@
 		return $input;
 	}
 
+	# Get the user input from fields
 	function getPostValue($field) {
 		if (isset($_POST[$field])) {
 			$input = $_POST[$field];
@@ -32,6 +33,7 @@
 		return $input;
 	}
 
+	# Truncates $str so that it has $maxChar max characters followed by ...
 	function truncate($str, $maxChar) {
 		if (strlen($str) > $maxChar) {
 			return substr($str, 0, $maxChar) . "...";
@@ -40,6 +42,7 @@
 		}
 	}
 
+	# Config for db 
 	$config = parse_ini_file('config.ini');
 	$servername = $config['db_host'];
 	$username = $config['db_user'];
@@ -102,6 +105,7 @@
 			header("Location: emailservicepage.php?page=1");
 			
 		} elseif (isset($_POST['emailIds'])) {
+			# Updates the table based on the selected emails
 			$emailIds = json_decode($_POST['emailIds'], true);
 			$status = array_shift($emailIds);
 			if ($status == "Closed") {
@@ -123,8 +127,10 @@
 			foreach ($emailIds as $emailId) {
 				$emailId = substr($emailId, 0, -1);
 				if ($status == "Refund" || $status == "Cancel") {
+					# Update type (Refund/Cancel)
 					$sql = "UPDATE emailsort SET type = '$status' WHERE id LIKE '$emailId%'";
 				} else {
+					# Update status (Open/Pending/Closed)
 					$sql = "UPDATE emailsort SET status = '$status' WHERE id LIKE '$emailId%'";
 				}
 				$result = $conn->query($sql);
@@ -137,6 +143,7 @@
 			header("Location: emailservicepage.php?page=$currentPage");
 		}
 	} else {
+		# Maintain the search field inputs after form submission
 		$_POST['sender'] = getSessionValue('sender');
 		$_POST['address'] = getSessionValue('address');
 		$_POST['title'] = getSessionValue('title');
@@ -168,6 +175,7 @@
 		$sql = $sql . " AND status LIKE '%" . $status . "%'";
 	}
 
+	# Retrieve all table data
 	$sql = $sql . " ORDER BY status DESC, date ASC LIMIT " . $emailsPerPage . " OFFSET " . $startIndex;
 	$info = array();
 	$result = $conn->query($sql);
@@ -175,10 +183,11 @@
 		echo "Error: " . $sql . "<br>" . $conn->error."<br/>";
 	} elseif ($result->num_rows > 0) {
 		while ($row = $result->fetch_assoc()) {
-			array_push($info, array($row["id"], $row["emailuid"], $row["sendername"], $row["senderaddr"], $row["title"], $row["body"], $row["type"], $row['status'], $row["date"]));
+			array_push($info, array($row["id"], $row["emailuid"], $row["sendername"], $row["senderaddr"], $row["title"], $row["body"], $row["type"], $row['status'], $row["date"], $row['ordernum']));
 		}
 	}
 	
+	# Pages
 	$frompos = strpos($sql, "FROM");
 	$orderpos = strpos($sql, "ORDER");
 	$substr = substr($sql, $frompos, $orderpos - $frompos);
@@ -360,9 +369,9 @@
 	<input type="hidden" id="emailIdsInput" name="emailIds" value="">
 	<button style = "background-color: #ccffcc" type="submit" onclick="markRefunds()">Mark selected as Refunds</button>
 	<button style = "background-color: #ff9999" onclick="markCancels()">Mark selected as Cancels</button>
-	<button onclick="markPending()">Mark selected as Pending</button><br><br>
+	<button style = "background-color: #ffffcc" onclick="markPending()">Mark selected as Pending</button><br><br>
 	<b>Closed By (NAME):</b> <input name="closedby" type="text" style="height:25pt;width:100pt;" value="<?php echo isset($_POST['closedby']) ? $_POST['closedby'] : '' ?>">
-	<button onclick="markClosed()">Mark selected as Closed</button>
+	<button style = "background-color: #c3cde6" onclick="markClosed()">Mark selected as Closed</button>
 </form>
 </td>
 </tr>
@@ -374,8 +383,8 @@
 <table border="1">
     <tr style="background-color: #eee;">
       <th> ID </th>
-      <th>Sender</th>
 	  <th>Address</th>
+	  <th>Order #</th>
 	  <th>Title</th>
 	  <th>Status</th>
 	  <th>Date</th>
@@ -385,7 +394,6 @@
 	<?php
 	// Set the background color of the table
 	foreach ($info as $row){
-		$row[2] = truncate($row[2], 30);
 		$row[3] = truncate($row[3], 30);
 		$row[4] = truncate($row[4], 50);
 		if ($row[6] == "Refund") {
@@ -403,10 +411,10 @@
 			$colour = '#c3cde6';
 		}
 	?>
-	<tr bgcolor="<?= $colour ?>">
+	<tr bgcolor="<?= $colour // Display each row?>">
 		<td class="center"><?= $row[0] ?></td>
-		<td class="center"><?= $row[2] ?></td>
         <td class="center"><?= $row[3] ?></td>
+        <td class="center"><?= $row[9] ?></td>
 		<?php
 		$encoded_uid = base64_encode($row[1]);
 		?>

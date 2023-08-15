@@ -112,13 +112,27 @@
 					$body = $row[5];
 					$date = $row[6];
 					
-					$sql = "INSERT INTO emailsort (emailuid, sendername, senderaddr, title, body, date, type, status, closedby) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON 
+					$ordernum = '####';
+					$pattern = '/\d{3}-\d{7}-\d{7}/';
+					$cleanedHtmlContent = str_replace(['<o:p>', '</o:p>'], '', $body);
+					$dom = new DOMDocument();
+					
+					$dom->loadHTML(htmlspecialchars($cleanedHtmlContent));
+					foreach ($dom->getElementsByTagName('*') as $element) {
+						$nodeValue = $element->nodeValue;
+						if (preg_match_all($pattern, $nodeValue, $matches)) {
+							$ordernum = $matches[0][0];
+							break;
+						}
+					}
+
+					$sql = "INSERT INTO emailsort (emailuid, sendername, senderaddr, title, body, date, type, status, closedby, ordernum) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON 
 					DUPLICATE KEY UPDATE type = ?";
 					$stmt = $conn->prepare($sql);
 					
 					$status = "Open";
 					$closedby = '';
-					$stmt->bind_param("ssssssssss", $emailuid, $sender, $senderaddr, $title, $body, $date, $type, $status, $closedby, $type);
+					$stmt->bind_param("sssssssssss", $emailuid, $sender, $senderaddr, $title, $body, $date, $type, $status, $closedby, $ordernum, $type);
 					
 					$stmt->execute();
 					
@@ -329,7 +343,7 @@
 	foreach ($info as $row){
 		$row[2] = truncate($row[2], 30);
 		$row[3] = truncate($row[3], 30);
-		$row[4] = truncate($row[4], 100);
+		$row[4] = truncate($row[4], 80);
 		if ($row[6] == "Refund") {
 			$colour = "#ccffcc";
 		} elseif ($row[6] == "Cancel") {

@@ -23,7 +23,7 @@
             echo "Error: " . $sql . "<br>" . $conn->error."<br/>";
         } elseif ($result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
-                array_push($info, array($row["id"], $row["emailuid"], $row["sendername"], $row["senderaddr"], $row["title"], $row["body"], $row["date"], $row["type"]));
+                array_push($info, array($row["id"], $row["emailuid"], $row["sendername"], $row["senderaddr"], $row["title"], $row["body"], $row["date"], $row["type"], $row["note"]));
             }
         } else {
             echo "<h1> EMAIL NOT FOUND: </h1>" . $sql;
@@ -48,12 +48,25 @@
         $date = $row[6];
         $status = "Open";
         $closedby = '';
+
+        $ordernum = '####';
+        $pattern = '/\d{3}-\d{7}-\d{7}/';
+        $cleanedHtmlContent = str_replace(['<o:p>', '</o:p>'], '', $body);
+        $dom = new DOMDocument();
+        $dom->loadHTML(htmlspecialchars($cleanedHtmlContent));
+        foreach ($dom->getElementsByTagName('*') as $element) {
+            $nodeValue = $element->nodeValue;
+            if (preg_match_all($pattern, $nodeValue, $matches)) {
+                $ordernum = $matches[0][0];
+                break;
+            }
+        }
         
-        $sql = "INSERT INTO emailsort (emailuid, sendername, senderaddr, title, body, date, type, status, closedby) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON 
-        DUPLICATE KEY UPDATE type = ?";
+        $sql = "INSERT INTO emailsort (emailuid, sendername, senderaddr, title, body, date, type, status, closedby, ordernum) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON 
+        DUPLICATE KEY UPDATE type = ?, ordernum = ?";
         $stmt = $conn->prepare($sql);
         
-        $stmt->bind_param("ssssssssss", $emailuid, $sender, $senderaddr, $title, $body, $date, $type, $status, $closedby, $type);
+        $stmt->bind_param("ssssssssssss", $emailuid, $sender, $senderaddr, $title, $body, $date, $type, $status, $closedby, $ordernum, $type, $ordernum);
         
         $stmt->execute();
     }
@@ -63,6 +76,13 @@
             updateEmailType("Refund", $conn, $emailuid, $info[0]);
         } elseif (isset($_POST['markcancel'])) {
             updateEmailType("Cancel", $conn, $emailuid, $info[0]);
+        } elseif (isset($_POST['saveNote'])) {
+            $note_content = $_POST['note_content'];
+            $sql = "UPDATE emails SET note = '$note_content' WHERE emailuid LIKE '$emailuid%'";
+            $result = $conn->query($sql);
+            if ($result === false) {
+                echo "Error: " . $sql . "<br>" . $conn->error."<br/>";
+            }
         }
         $currentUrl = $_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING'];
         header("Location: ". $currentUrl);
@@ -117,7 +137,13 @@
 		echo "<h3> " . $row[2] . "</h3>";
 		echo "<h3> " . $row[3] . "</h3>";
 		echo "<h3> " . $row[6] . "</h3>";
+        $existing_note_content = $row[8];
         ?> 
+        <form method="post">
+            <textarea name="note_content" rows="5" cols="100"><?php echo $existing_note_content; ?></textarea>
+            <br>
+            <input type="submit" name="saveNote" value="Save Note">
+        </form>
         <form name="buttonForm" method="POST">
             <input style = "background-color: #ccffcc" type="submit" name="markrefund" value="Mark as Refund" id="markrefund" />
             <input style = "background-color: #ff9999" type="submit" name="markcancel" value="Mark as Cancel" id="markcancel" />
