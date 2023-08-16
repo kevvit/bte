@@ -27,8 +27,6 @@
 		if (isset($_POST[$field])) {
 			$input = $_POST[$field];
 			if ($field === "beforedate" || $field === "afterdate") {
-                echo "getting date";
-                exit();
 				$dateTime = DateTime::createFromFormat("m/d/Y", $input);
 				$errors = DateTime::getLastErrors();
 				if ($dateTime === false || $errors['error_count'] > 0 || $errors['warning_count'] > 0 || $dateTime->format("m/d/Y") !== $input) {
@@ -36,8 +34,6 @@
 					$input = '';
 				} else {
 					// Format the date as needed
-                    echo "good";
-                    exit(1);
 			        $_SESSION[$field] = $input;
 					return $dateTime->format("Y-m-d");
 				}
