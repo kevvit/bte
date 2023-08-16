@@ -39,38 +39,6 @@ def save_current_timestamp():  # Save the current date and time to the emailmoni
 
 # Get the body of differently encoded emails
 def get_email_body(email_message):
-    """
-    def get_charset():
-        charset = email_message.get_charset()
-        return charset if charset else 'utf-8'  # Default charset
-
-    if email_message.is_multipart():
-        for part in email_message.walk():
-            content_type = part.get_content_type()
-            charset = get_charset()
-
-            if "text/plain" in content_type:
-                try:
-                    email_body = part.get_payload(decode=True).decode(charset)
-                    break
-                except UnicodeDecodeError:
-                    # If decoding fails, use chardet to detect the character encoding
-                    detected_charset = chardet.detect(part.get_payload(decode=True))['encoding']
-                    email_body = part.get_payload(decode=True).decode(detected_charset)
-                    break
-        else:
-            email_body = ""  # If no plain text part is found
-    else:
-        charset = get_charset()
-        try:
-            email_body = email_message.get_payload(decode=True).decode(charset)
-        except UnicodeDecodeError:
-            # If decoding fails, use chardet to detect the character encoding
-            detected_charset = chardet.detect(email_message.get_payload(decode=True))['encoding']
-            email_body = email_message.get_payload(decode=True).decode(detected_charset)
-
-    return email_body
-    """
     # Function to handle decoding with replacement for invalid characters
     def safe_decode(text, encoding='utf-8'):
         try:
