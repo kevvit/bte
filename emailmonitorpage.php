@@ -28,11 +28,8 @@
 					echo "Error: " . $sql . "<br>" . $conn->error."<br/>";
 					exit(1);
 				} elseif ($result->num_rows > 0) {
-					$info = array();
-					while ($row = $result->fetch_assoc()) {
-						array_push($info, array($row["id"], $row["emailuid"], $row["sendername"], $row["senderaddr"], $row["title"], $row["body"], $row["date"]));
-					}
-					updateEmailType($type, $conn, $info[0][1], $info[0]);
+					$info = $result->fetch_assoc();
+					updateEmailType($type, $conn, $info['emailuid'], $info);
 				}
 			}
 			$sql = "SELECT * FROM emails WHERE NOT id = 0";
@@ -55,7 +52,7 @@
 		exit(1);
 	} elseif ($result->num_rows > 0) {
 		while ($row = $result->fetch_assoc()) {
-			array_push($info, array($row["id"], $row["emailuid"], $row["sendername"], $row["senderaddr"], $row["title"], $row["body"], $row["type"], $row["date"]));
+			array_push($info, $row);
 		}
 	}
 	
@@ -116,26 +113,26 @@
 			<?php
 				// Set the background color of the table
 				foreach ($info as $row){
-					$row[2] = truncate($row[2], 30);
-					$row[3] = truncate($row[3], 30);
-					$row[4] = truncate($row[4], 80);
-					if ($row[6] == "Refund") {
+					$row['sendername'] = truncate($row['sendername'], 30);
+					$row['senderaddr'] = truncate($row['senderaddr'], 30);
+					$row['title'] = truncate($row['title'], 80);
+					if ($row['type'] == "Refund") {
 						$colour = "#ccffcc";
-					} elseif ($row[6] == "Cancel") {
+					} elseif ($row['type'] == "Cancel") {
 						$colour = "#ff9999";
 					} else {
 						$colour = "#c3cde6";
 					}
 			?>
 			<tr bgcolor="<?= $colour ?>">
-				<td class="center"><?= $row[0] ?></td>
-				<td class="center"><?= $row[2] ?></td>
-				<td class="center"><?= $row[3] ?></td>
+				<td class="center"><?= $row['id'] ?></td>
+				<td class="center"><?= $row['sendername'] ?></td>
+				<td class="center"><?= $row['senderaddr'] ?></td>
 				<?php
-					$encoded_uid = base64_encode($row[1]);
+					$encoded_uid = base64_encode($row['emailuid']);
 				?>
-				<td class="center"><a href="view_email.php?id=<?= $encoded_uid ?>" target="_blank"><?= $row[4] ?></a></td>
-				<td class="center" bgcolor="<?= $colour ?>"><?= $row[7] ?></td>
+				<td class="center"><a href="view_email.php?id=<?= $encoded_uid ?>" target="_blank"><?= $row['title'] ?></a></td>
+				<td class="center" bgcolor="<?= $colour ?>"><?= $row['date'] ?></td>
 				<td><input type="checkbox" name="emailCheckbox"></td>
 			</tr>
 

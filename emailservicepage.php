@@ -45,14 +45,12 @@
 				if ($result === false) {
 					echo "Error: " . $sql . "<br>" . $conn->error."<br/>";
 				} elseif ($result->num_rows > 0) {
-					while ($row = $result->fetch_assoc()) {
-						array_push($info, array($row["emailuid"]));
-					}
+					$info = $result->fetch_assoc();
 				} else {
 					echo "Email not found in emails database.";
 					exit(1);
 				}
-				$emailuid = $info[0][0];
+				$emailuid = $info['emailuid'];
 				if ($status == "Refund" || $status == "Cancel") {
 					# Update type (Refund/Cancel)
 					$sql = "UPDATE emailsort SET type = '$status' WHERE emailuid LIKE '$emailuid%'";
@@ -90,7 +88,7 @@
 		exit(1);
 	} elseif ($result->num_rows > 0) {
 		while ($row = $result->fetch_assoc()) {
-			array_push($info, array($row["id"], $row["emailuid"], $row["sendername"], $row["senderaddr"], $row["title"], $row["body"], $row["type"], $row['status'], $row["date"], $row['ordernum']));
+			array_push($info, $row);
 		}
 	}
 	
@@ -169,33 +167,33 @@
 			<?php
 				// Set the background color of the table
 				foreach ($info as $row){
-					$row[3] = truncate($row[3], 30);
-					$row[4] = truncate($row[4], 50);
-					if ($row[6] == "Refund") {
-						$row[0] = $row[0] . "R";
+					$row['senderaddr'] = truncate($row['senderaddr'], 30);
+					$row['title'] = truncate($row['title'], 50);
+					if ($row['type'] == "Refund") {
+						$row['id'] = $row['id'] . "R";
 						$colour = "#ccffcc";
-					} elseif ($row[6] == "Cancel") {
-						$row[0] = $row[0] . "C";
+					} elseif ($row['type'] == "Cancel") {
+						$row['id'] = $row['id'] . "C";
 						$colour = "#ff9999";
 					} else {
 						$colour = "#c3cde6";
 					}
-					if ($row[7] == "Pending") {
+					if ($row['status'] == "Pending") {
 						$colour = "#ffffcc";
-					} elseif ($row[7] != "Open") {
+					} elseif ($row['status'] != "Open") {
 						$colour = '#c3cde6';
 					}
 			?>
 			<tr bgcolor="<?= $colour // Display each row?>">
-				<td class="center"><?= $row[0] ?></td>
-				<td class="center"><?= $row[3] ?></td>
-				<td class="center"><?= $row[9] ?></td>
+				<td class="center"><?= $row['id'] ?></td>
+				<td class="center"><?= $row['senderaddr'] ?></td>
+				<td class="center"><?= $row['ordernum'] ?></td>
 				<?php
-				$encoded_uid = base64_encode($row[1]);
+				$encoded_uid = base64_encode($row['emailuid']);
 				?>
-				<td class="center"><a href="view_email.php?id=<?= $encoded_uid ?>" target="_blank"><?= $row[4] ?></a></td>
-				<td class="center" bgcolor="<?= $colour ?>"><?= $row[7] ?></td>
-				<td class="center" bgcolor="<?= $colour ?>"><?= $row[8] ?></td>
+				<td class="center"><a href="view_email.php?id=<?= $encoded_uid ?>" target="_blank"><?= $row['title'] ?></a></td>
+				<td class="center" bgcolor="<?= $colour ?>"><?= $row['status'] ?></td>
+				<td class="center" bgcolor="<?= $colour ?>"><?= $row['date'] ?></td>
 				<td><input type="checkbox" name="emailCheckbox"></td>
 			</tr>
 

@@ -171,11 +171,11 @@
      * @param string $type "Refund" or "Cancel" to classify the email
      * @param object $conn Connection to database via mysqli
      * @param string $emailuid The uid of the email to classify
-     * @param array[string] $row Array of email information fetched from database
+     * @param array[string] $info Array of email information fetched from database
      * @return void
      * 
      */
-    function updateEmailType($type, $conn, $emailuid, $row) {
+    function updateEmailType($type, $conn, $emailuid, $info) {
         $sql = "UPDATE emails SET type = '$type' WHERE emailuid LIKE '$emailuid%'";
         $result = $conn->query($sql);
         if ($result === false) {
@@ -183,11 +183,11 @@
             exit(1);
         }
 
-        $sender = $row[2];
-        $senderaddr = $row[3];
-        $title = $row[4];
-        $body = $row[5];
-        $date = $row[6];
+        $sender = $info['sendername'];
+        $senderaddr = $info['senderaddr'];
+        $title = $info['title'];
+        $body = $info['body'];
+        $date = $info['date'];
         $status = "Open";
         $closedby = '';
 
@@ -247,7 +247,6 @@
             echo "Error: " . $sql . "<br>" . $conn->error."<br/>";
             exit(1);
         } elseif ($result->num_rows > 0) {
-
             $row = $result->fetch_assoc();
             $totalEmails = $row['total'];
         }

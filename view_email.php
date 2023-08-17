@@ -11,9 +11,7 @@
         if ($result === false) {
             echo "Error: " . $sql . "<br>" . $conn->error."<br/>";
         } elseif ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                array_push($info, array($row["id"], $row["emailuid"], $row["sendername"], $row["senderaddr"], $row["title"], $row["body"], $row["date"], $row["type"], $row["note"]));
-            }
+            $info = $result->fetch_assoc();
         } else {
             echo "<h1> EMAIL NOT FOUND: </h1>" . $sql;
         }
@@ -24,9 +22,9 @@
 
     if ($_POST) {
         if (isset($_POST['markrefund'])) {
-            updateEmailType("Refund", $conn, $emailuid, $info[0]);
+            updateEmailType("Refund", $conn, $emailuid, $info);
         } elseif (isset($_POST['markcancel'])) {
-            updateEmailType("Cancel", $conn, $emailuid, $info[0]);
+            updateEmailType("Cancel", $conn, $emailuid, $info);
         } elseif (isset($_POST['saveNote'])) {
             $note_content = $_POST['note_content'];
             $sql = "UPDATE emails SET note = '$note_content' WHERE emailuid LIKE '$emailuid%'";
@@ -55,17 +53,16 @@
             <?php
             // Set the background color of the table
                 $colour = "#c3cde6";
-                foreach ($info as $row){
-                    if ($row[7] == "Refund") {
-                        $row[4] = $row[4] . " (REFUND)";
-                    } elseif ($row[7] == "Cancel") {
-                        $row[4] = $row[4] . " (CANCEL)";
-                    }
-                    echo "<h1> " . $row[4] . "</h1>";
-                    echo "<h3> " . $row[2] . "</h3>";
-                    echo "<h3> " . $row[3] . "</h3>";
-                    echo "<h3> " . $row[6] . "</h3>";
-                    $existing_note_content = $row[8];
+                if ($info['type'] == "Refund") {
+                    $info['title'] = $info['title'] . " (REFUND)";
+                } elseif ($info['type'] == "Cancel") {
+                    $info['title'] = $info['title'] . " (CANCEL)";
+                }
+                echo "<h1> " . $info['title'] . "</h1>";
+                echo "<h3> " . $info['sendername'] . "</h3>";
+                echo "<h3> " . $info['senderaddr'] . "</h3>";
+                echo "<h3> " . $info['date'] . "</h3>";
+                $existing_note_content = $info['note'];
                     ?> 
                     <form method="post">
                         <textarea name="note_content" rows="5" cols="100"><?php echo $existing_note_content; ?></textarea>
@@ -77,12 +74,11 @@
                         <input style = "background-color: #ff9999" type="submit" name="markcancel" value="Mark as Cancel" id="markcancel" />
                     </form>
                     <?php
-                    echo "<title>" . $row[4] . "</title>";
+                    echo "<title>" . $info['title'] . "</title>";
             ?>
             <tr>
-                <td class="center" bgcolor="<?= $colour ?>"><?= nl2br($row[5]) ?></td>
+                <td class="center" bgcolor="<?= $colour ?>"><?= nl2br($info['body']) ?></td>
             </tr>
-            <?php } ?>
         </table>
     </body>
 </html>
