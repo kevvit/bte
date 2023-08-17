@@ -2,19 +2,8 @@
 	require_once 'helper.php';
 	session_start();
 	
-	$config = parse_ini_file('config.ini');
-	$servername = $config['db_host'];
-	$username = $config['db_user'];
-	$password = $config['db_password'];
-	$database = $config['db_name'];
-
-	$conn = new mysqli($servername, $username, $password, $database);
-	if ($conn->connect_error) {
-		die("Connection failed: " . $conn->connect_error);
-	} 
-
+	$conn = connSetup();
 	$currentPage = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-	$emailsPerPage = 20;
 	$startIndex = ($currentPage - 1) * $emailsPerPage;
 
 	$sql = "SELECT * FROM emails WHERE NOT id = 0";
@@ -28,8 +17,8 @@
 			# Add queries to filter and retrieve select emails
 			$sql = getValues($searchFields, $sql, "post");
 			header("Location: emailmonitorpage.php?page=1");
-			
 		} elseif (isset($_POST['emailIds'])) { # Clicked mark selected as refunds/cancels
+			# Updates the table based on the selected emails
 			$emailIds = json_decode($_POST['emailIds'], true);
 			$type = array_shift($emailIds);
 			foreach ($emailIds as $emailId) {
@@ -37,23 +26,27 @@
 				$result = $conn->query($sql);
 				if (!$result) {
 					echo "Error: " . $sql . "<br>" . $conn->error."<br/>";
+					exit(1);
 				} elseif ($result->num_rows > 0) {
 					$info = array();
 					while ($row = $result->fetch_assoc()) {
 						array_push($info, array($row["id"], $row["emailuid"], $row["sendername"], $row["senderaddr"], $row["title"], $row["body"], $row["date"]));
 					}
 					updateEmailType($type, $conn, $info[0][1], $info[0]);
-					$sql = "SELECT * FROM emails WHERE NOT id = 0";
 				}
 			}
+			$sql = "SELECT * FROM emails WHERE NOT id = 0";
+			header("Location: emailmonitorpage.php?page=$currentPage");
 		}
 	} else {
+		# Maintain the search field inputs after form submission
 		foreach ($searchFields as $fields) {
 			$_POST[$fields] = getSessionValue($fields);
 		}
 		$sql = getValues($searchFields, $sql, "session");
 	}
 
+	# Retrieve all table data
 	$sql = $sql . " ORDER BY date DESC LIMIT " . $emailsPerPage . " OFFSET " . $startIndex;
 	$info = array();
 	$result = $conn->query($sql);
@@ -66,7 +59,7 @@
 		}
 	}
 	
-	$totalPages = calculatePages($emailsPerPage, $sql, $conn);
+	$totalPages = calculatePages($sql, $conn);
 ?>
 
 <html>

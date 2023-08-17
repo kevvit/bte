@@ -1,4 +1,26 @@
 <?php
+    $emailsPerPage = 20; # Number of emails to display per page
+
+    /**
+     * Set up connection to the database using the credentials from config.ini
+     * 
+     * @return object $conn The connection to the database via mysqli
+     * 
+     */
+    function connSetup() {
+        $config = parse_ini_file('config.ini');
+        $servername = $config['db_host'];
+        $username = $config['db_user'];
+        $password = $config['db_password'];
+        $database = $config['db_name'];
+
+        $conn = new mysqli($servername, $username, $password, $database);
+        if ($conn->connect_error) {
+            die("Connection failed: " . $conn->connect_error);
+        } 
+        return $conn;
+    }
+
     /**
      * Retrieve saved information from the session to maintain search queries from previous searches
      * 
@@ -147,7 +169,7 @@
      * Updates the email type (refund or cancel) as well as the order mumber, if found from regex
      * 
      * @param string $type "Refund" or "Cancel" to classify the email
-     * @param mysqli $conn Connection to database via mysqli
+     * @param object $conn Connection to database via mysqli
      * @param string $emailuid The uid of the email to classify
      * @param array[string] $row Array of email information fetched from database
      * @return void
@@ -210,10 +232,11 @@
      * 
      * @param int $emailsPerPage The max total number of emails allowed to display on each page
      * @param string $sql The sql statement containing the filter(s), if any
-     * @param mysqli $conn Connection to database via mysqli
+     * @param object $conn Connection to database via mysqli
      * @return int $totalPages The total pages based on the filters
      */
-    function calculatePages($emailsPerPage, $sql, $conn) {
+    function calculatePages($sql, $conn) {
+        global $emailsPerPage;
         $frompos = strpos($sql, "FROM");
         $orderpos = strpos($sql, "ORDER");
         $substr = substr($sql, $frompos, $orderpos - $frompos);

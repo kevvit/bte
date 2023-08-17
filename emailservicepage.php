@@ -2,20 +2,8 @@
 	require_once 'helper.php';
 	session_start();
 
-	# Config for db 
-	$config = parse_ini_file('config.ini');
-	$servername = $config['db_host'];
-	$username = $config['db_user'];
-	$password = $config['db_password'];
-	$database = $config['db_name'];
-
-	$conn = new mysqli($servername, $username, $password, $database);
-	if ($conn->connect_error) {
-		die("Connection failed: " . $conn->connect_error);
-	} 
-
+	$conn = connSetup();
 	$currentPage = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-	$emailsPerPage = 20;
 	$startIndex = ($currentPage - 1) * $emailsPerPage;
 
 	$sql = "SELECT * FROM emailsort WHERE NOT id = 0";
@@ -25,12 +13,11 @@
 	if ($_POST) {
 		if(isset($_POST['clearbtn'])) {
 			clearFields($searchFields, "emailservicepage");
-		} elseif (isset($_POST['searchbtn'])) {
+		} elseif (isset($_POST['searchbtn'])) { # Clicked Search button
 			# Add queries to filter and retrieve select emails
 			$sql = getValues($searchFields, $sql, "post");
 			header("Location: emailservicepage.php?page=1");
-			
-		} elseif (isset($_POST['emailIds'])) {
+		} elseif (isset($_POST['emailIds'])) { # Clicked mark selected as refunds/cancels/pending/closed
 			# Updates the table based on the selected emails
 			$emailIds = json_decode($_POST['emailIds'], true);
 			$status = array_shift($emailIds);
@@ -82,9 +69,8 @@
 				if (!$result) {
 					echo "Error: " . $sql . "<br>" . $conn->error."<br/>";
 				} 
-				$sql = "SELECT * FROM emailsort WHERE NOT id = 0";
 			}
-
+			$sql = "SELECT * FROM emailsort WHERE NOT id = 0";
 			header("Location: emailservicepage.php?page=$currentPage");
 		}
 	} else {
@@ -101,13 +87,14 @@
 	$result = $conn->query($sql);
 	if ($result === false) {
 		echo "Error: " . $sql . "<br>" . $conn->error."<br/>";
+		exit(1);
 	} elseif ($result->num_rows > 0) {
 		while ($row = $result->fetch_assoc()) {
 			array_push($info, array($row["id"], $row["emailuid"], $row["sendername"], $row["senderaddr"], $row["title"], $row["body"], $row["type"], $row['status'], $row["date"], $row['ordernum']));
 		}
 	}
 	
-	$totalPages = calculatePages($emailsPerPage, $sql, $conn);
+	$totalPages = calculatePages($sql, $conn);
 ?>
 
 <html>

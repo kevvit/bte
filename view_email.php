@@ -1,17 +1,7 @@
 <?php
     require_once 'helper.php';
     if (isset($_GET['id'])) {
-        $config = parse_ini_file('config.ini');
-        $servername = $config['db_host'];
-        $username = $config['db_user'];
-        $password = $config['db_password'];
-        $database = $config['db_name'];
-
-        $conn = new mysqli($servername, $username, $password, $database);
-        if ($conn->connect_error) {
-            die("Connection failed: " . $conn->connect_error);
-        } 
-        
+        $conn = connSetup();
         $emailuid = base64_decode($_GET['id']);
 
         # Find the email with the uid as decoded from the url
