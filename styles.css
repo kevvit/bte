@@ -1,47 +1,112 @@
-body { width: 1660px; margin: 0 auto; }
-table { border-collapse: collapse; width: 100%; }
-table, td, th { 
-  border: 1px solid gray; 
-  padding: 5px 10px; 
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f7f7f7;
+    color: #333;
+    width: 90%;
 }
-input[type=submit] { padding: 4px 10px; }
-input[type=text] { font-size:15px; padding: 5px 10px; }
-.center { text-align: center; }
-#newlist li
-{
-  text-decoration: none;
-  list-style: none;
-  display:block;	
-  margin:1px;
-  text-align:left;
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    border: 2px solid black;
+    margin-top: 20px;
 }
+
+th, td {
+    border: 1px solid #333;
+    padding: 10px;
+    text-align: center;
+}
+
+input[type=submit] { 
+    padding: 4px 10px; 
+}
+
+input[type=text] { 
+    font-size:15px; padding: 5px 10px; 
+}
+
+.center { 
+    text-align: center; 
+}
+
+button:hover {
+    filter: brightness(1.1); /* Slightly increase brightness on hover */
+}
+
+input[type="submit"]:hover,
+input[type="text"]:focus {
+    background-color: white; /* Change background color */
+    color: black; /* Change text color */
+    outline: none;
+}
+
+ul#newlist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+ul#newlist li {
+    padding: 5px 0;
+    border-bottom: 1px solid #ccc;
+}
+
+input[type="submit"] {
+    padding: 8px 15px;
+    font-size: 14px;
+    border: none;
+    background-color: #333;
+    color:  #fff;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+textarea {
+    font-family: "Helvetica Neue", sans-serif; /* Better font choice */
+    font-size: 28px; /* Better font size */
+    padding: 10px;
+    width: 500px;
+    border: 1px solid #ccc;
+    background-color: white;
+    color: #333;
+    resize: vertical; /* Allow vertical resizing */
+    text-align: center;
+    transition: border-color 0.2s;
+}
+
 /* Styling for pagination links */
 .pagination {
-          font-size: 20px; /* Adjust the font size as per your preference */
-          display: flex;
-          justify-content: center;
-          align-items: center;
-      }
-  .pagination a {
-      margin: 10px;
-      text-decoration: none;
-      color: #333;
-  }
-  .current-page {
-      font-weight: bold;
-  }
-  .go-btn {
-      margin-left: 10px;
-  }
+    font-size: 20px; /* Adjust the font size as per your preference */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-  .go-form {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          margin-top: 10px;
-      }
-  .go-input {
-      width: 100px; /* Adjust the width as needed */
-      padding: 5px;
-      font-size: 16px;
-  }
+.pagination a {
+    margin: 10px;
+    text-decoration: none;
+    color: #333;
+}
+
+.current-page {
+    font-weight: bold;
+}
+
+.go-btn {
+    margin-left: 10px;
+}
+
+.go-form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.go-input {
+    width: 100px; /* Adjust the width as needed */
+    padding: 5px;
+    font-size: 16px;
+}
