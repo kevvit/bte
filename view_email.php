@@ -13,7 +13,8 @@
         } elseif ($result->num_rows > 0) {
             $info = $result->fetch_assoc();
         } else {
-            echo "<h1> EMAIL NOT FOUND: </h1>" . $sql;
+            echo "<h1> EMAIL NOT FOUND. <br>EMAIL UID: </h1>" . $emailuid;
+            exit();
         }
     } else {
         echo "<h1> ERROR </h1>";
@@ -70,8 +71,8 @@
                         <input type="submit" name="saveNote" value="Save Note">
                     </form>
                     <form name="buttonForm" method="POST">
-                        <input style = "background-color: #ccffcc" type="submit" name="markrefund" value="Mark as Refund" id="markrefund" />
-                        <input style = "background-color: #ff9999" type="submit" name="markcancel" value="Mark as Cancel" id="markcancel" />
+                        <input style = "background-color: #ccffcc; color: #333" type="submit" name="markrefund" value="Mark as Refund" id="markrefund" />
+                        <input style = "background-color: #ff9999; color: #333" type="submit" name="markcancel" value="Mark as Cancel" id="markcancel" />
                     </form>
                     <?php
                     echo "<title>" . $info['title'] . "</title>";
