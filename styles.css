@@ -1,9 +1,17 @@
 
-body {
+body, h1, h3 {
     font-family: Arial, sans-serif;
     background-color: #f7f7f7;
     color: #333;
     width: 90%;
+}
+
+h1, h3 {
+    font-family: Arial, sans-serif !important;
+    margin: 0 !important;
+    background-color: #f7f7f7;
+    color: #333 !important;
+    width: 100%;
 }
 
 table {
@@ -40,17 +48,6 @@ input[type="text"]:focus {
     background-color: white; /* Change background color */
     color: black; /* Change text color */
     outline: none;
-}
-
-ul#newlist {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-ul#newlist li {
-    padding: 5px 0;
-    border-bottom: 1px solid #ccc;
 }
 
 input[type="submit"] {

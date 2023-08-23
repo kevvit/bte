@@ -59,6 +59,7 @@
                 } elseif ($info['type'] == "Cancel") {
                     $info['title'] = $info['title'] . " (CANCEL)";
                 }
+                echo "<div class=\"center\">";
                 echo "<h1> " . $info['title'] . "</h1>";
                 echo "<h3> " . $info['sendername'] . "</h3>";
                 echo "<h3> " . $info['senderaddr'] . "</h3>";
@@ -76,9 +77,24 @@
                     </form>
                     <?php
                     echo "<title>" . $info['title'] . "</title>";
+                    echo "</div>";
             ?>
+            <style>
+                table {
+                    border: none;
+                    border-spacing: 0;
+                    width: 100%;
+                }
+
+                th, td {
+                    padding: 0;
+                    text-align: left;
+                    vertical-align: top;
+                    border: none;
+                }
+            </style>
             <tr>
-                <td class="center" bgcolor="<?= $colour ?>"><?= nl2br($info['body']) ?></td>
+                <td class="center"  style="background-color: <?= $colour ?> !important;"><?= "<br><br><br>" . str_replace("<br />", "", nl2br($info['body'])) . "<br><br><br>" ?></td>
             </tr>
         </table>
     </body>
