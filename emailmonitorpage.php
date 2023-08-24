@@ -76,18 +76,18 @@
 	</head>
 	<body>
 		<br>
-		<h1>Inbox</h1>
+		<h1>INBOX</h1>
 
 		<!-- SEARCH TABLE -->
 		<table border="1">
 			<tr>
 				<td style="background-color: #e9ebf4;">
 					<form name="inputForm" method="POST">
-						<b>Sender:</b> <input name="M_sendername" type="text" style="height:25pt;width:100pt;" value="<?php echo isset($_POST['M_sendername']) ? $_POST['M_sendername'] : '' ?>">
-						<b>Address:</b> <input name="M_senderaddr" type="text" style="height:25pt;width:100pt;" value="<?php echo isset($_POST['M_senderaddr']) ? $_POST['M_senderaddr'] : '' ?>">
-						<b> Title: </b> <input name="M_title" type="text" style="height:25pt;width:100pt;" value="<?php echo isset($_POST['M_title']) ? $_POST['M_title'] : '' ?>">
-						<b> After (MM/DD/YYYY):	</b> <input name="M_afterdate" class="datepicker" style="height:25pt;width:100pt;" value="<?php echo isset($_POST['M_afterdate']) ? $_POST['M_afterdate'] : '' ?>">
-						<b> Before (MM/DD/YYYY):	</b> <input name="M_beforedate" class="datepicker" style="height:25pt;width:100pt;" value="<?php echo isset($_POST['M_beforedate']) ? $_POST['M_beforedate'] : '' ?>">
+						<b>Sender:</b> <input name="M_sendername" class="marg" type="text" style="height:25pt;width:100pt;" value="<?php echo isset($_POST['M_sendername']) ? $_POST['M_sendername'] : '' ?>">
+						<b>Address:</b> <input name="M_senderaddr" class="marg" type="text" style="height:25pt;width:100pt;" value="<?php echo isset($_POST['M_senderaddr']) ? $_POST['M_senderaddr'] : '' ?>">
+						<b> Title: </b> <input name="M_title" class="marg" type="text" style="height:25pt;width:100pt;" value="<?php echo isset($_POST['M_title']) ? $_POST['M_title'] : '' ?>">
+						<b> After (MM/DD/YYYY):	</b> <input name="M_afterdate" class="datepicker marg" style="height:25pt;width:100pt;" value="<?php echo isset($_POST['M_afterdate']) ? $_POST['M_afterdate'] : '' ?>">
+						<b> Before (MM/DD/YYYY):	</b> <input name="M_beforedate" class="datepicker marg" style="height:25pt;width:100pt;" value="<?php echo isset($_POST['M_beforedate']) ? $_POST['M_beforedate'] : '' ?>">
 						
 						<input type="submit" name="searchbtn" value="Search" id="searchbtn" />
 						<input type="submit" name="clearbtn" value="Clear Filters" id="clearbtn" />

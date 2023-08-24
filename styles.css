@@ -1,6 +1,6 @@
 
 body, h1, h3 {
-    font-family: Arial, sans-serif;
+    font-family: "Helvetica Neue", Arial, sans-serif;
     background-color: #f7f7f7;
     color: #333;
     width: 90%;
@@ -27,7 +27,8 @@ th, td {
     text-align: center;
 }
 
-input[type=submit] { 
+input[type=submit], button { 
+    font-weight: bold;
     padding: 4px 10px; 
 }
 
@@ -37,6 +38,10 @@ input[type=text] {
 
 .center { 
     text-align: center; 
+}
+
+.marg {
+    margin-right: 10px;
 }
 
 button:hover {
