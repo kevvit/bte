@@ -28,11 +28,10 @@
             updateEmailType("Cancel", $conn, $emailuid, $info);
         } elseif (isset($_POST['saveNote'])) {
             $note_content = $_POST['note_content'];
-            $sql = "UPDATE emails SET note = '$note_content' WHERE emailuid LIKE '$emailuid%'";
-            $result = $conn->query($sql);
-            if ($result === false) {
-                echo "Error: " . $sql . "<br>" . $conn->error."<br/>";
-            }
+            $sql = "UPDATE emails SET note = ? WHERE emailuid LIKE '$emailuid%'";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("s", $note_content);
+            $stmt->execute();
         }
         $currentUrl = $_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING'];
         header("Location: ". $currentUrl);
