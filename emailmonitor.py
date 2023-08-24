@@ -52,10 +52,17 @@ def get_email_body(email_message):
         for part in email_message.walk():
             content_type = part.get_content_type()
             if "text/html" in content_type:
-                email_body = safe_decode(part.get_payload(decode=True))
+                payload = part.get_payload(decode=True)
+                charset = part.get_content_charset() or 'utf-8'  # Default to utf-8 if charset is not provided
+                email_body = safe_decode(payload, encoding=charset)
                 break
     else:
-        email_body = safe_decode(email_message.get_payload(decode=True))
+        try:
+            payload = email_message.get_payload(decode=True)
+            charset = email_message.get_content_charset() or 'utf-8'  # Default to utf-8 if charset is not provided
+            email_body = safe_decode(payload, encoding=charset)
+        except AttributeError:
+            pass  # In case the content charset is not available
     return email_body
 
 

@@ -46,11 +46,7 @@
     </head>
     <body>
         <br>
-        <table border="1">
-            <tr style="background-color: #eee;">
-                <th>Details</th>
-            </tr>
-        
+        <table style="border: 1px solid #333;" >
             <?php
             // Set the background color of the table
                 $colour = "#c3cde6";
@@ -68,6 +64,7 @@
                     ?> 
                     <form method="post">
                         <textarea name="note_content" rows="5" cols="100"><?php echo $existing_note_content; ?></textarea>
+                        <br>
                         <br>
                         <input type="submit" name="saveNote" value="Save Note">
                     </form>
@@ -92,9 +89,17 @@
                     vertical-align: top;
                     border: none;
                 }
+
+                p, b {
+                    text-align: left;
+                }
+
+                body {
+                    background-color: white !important;
+                }
             </style>
             <tr>
-                <td class="center"  style="background-color: <?= $colour ?> !important;"><?= "<br><br><br>" . str_replace("<br />", "", nl2br($info['body'])) . "<br><br><br>" ?></td>
+                <td class="center"><?= "<br><br><br>" . str_replace("<br />", "", nl2br($info['body'])) . "<br><br><br>" ?></td>
             </tr>
         </table>
     </body>
