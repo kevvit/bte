@@ -258,4 +258,33 @@
         return $totalPages;
     }
 
+    function retrieveAllEmails($conn, $sql) {
+        try {
+            $info = array();
+            $result = $conn->query($sql);
+            if ($result === false) {
+                echo "Error: " . $sql . "<br>" . $conn->error."<br/>";
+                exit(1);
+            } elseif ($result->num_rows > 0) {
+                while ($row = $result->fetch_assoc()) {
+                    array_push($info, $row);
+                }
+            }
+            return $info;
+        } catch (Exception $e) {
+            echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"styles.css\">";
+            echo "<div class='center'>";
+            echo "<br><br><br>";
+            echo "<h1>There was a problem accessing the database. Please check that your inputs are formatted properly.</h1>";
+            echo "<h2> Please use MM/DD/YYYY dates and refrain from using single quotes</h2>";
+            echo '<form method="POST">';
+            echo '<input type="submit" name="clearbtn" value="Go Back" id="clearbtn" />';
+            echo '</form>';
+            echo "</div>";
+            echo "<br><br><br>";
+            echo '<h3>Error show below: </h3>';
+
+        }
+    }
+
 ?>
