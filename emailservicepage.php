@@ -186,7 +186,7 @@
 				<td class="center"><a href="view_email.php?id=<?= $encoded_uid ?>" target="_blank"><?= $row['title'] ?></a></td>
 				<td class="center" bgcolor="<?= $colour ?>"><?= $row['status'] ?></td>
 				<td class="center" bgcolor="<?= $colour ?>"><?= $row['date'] ?></td>
-				<td><input type="checkbox" name="emailCheckbox"></td>
+				<td style="padding: 0"><input type="checkbox" class="modern-checkbox" name="emailCheckbox"></td>
 			</tr>
 
 			<?php
