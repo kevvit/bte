@@ -24,6 +24,7 @@
 			if ($status == "Closed") {
 				if (isset($_POST['closedby'])) {
 					$closedby = $_POST['closedby'] ?? '';
+					$closedby = str_replace("'", "", $closedby); // Do not allow single quotes
 					if ($closedby == '') {
 						echo "<script>alert('Name required');</script>";
 						echo '<script>window.location.href = "emailservicepage.php?page=' . $currentPage . '";</script>';
@@ -82,14 +83,22 @@
 	# Retrieve all table data
 	$sql = $sql . " ORDER BY status DESC, date ASC LIMIT " . $emailsPerPage . " OFFSET " . $startIndex;
 	$info = array();
-	$result = $conn->query($sql);
-	if ($result === false) {
-		echo "Error: " . $sql . "<br>" . $conn->error."<br/>";
-		exit(1);
-	} elseif ($result->num_rows > 0) {
-		while ($row = $result->fetch_assoc()) {
-			array_push($info, $row);
+	try {
+		$result = $conn->query($sql);
+		if ($result === false) {
+			echo "Error: " . $sql . "<br>" . $conn->error."<br/>";
+			exit(1);
+		} elseif ($result->num_rows > 0) {
+			while ($row = $result->fetch_assoc()) {
+				array_push($info, $row);
+			}
 		}
+	} catch (Exception $e) {
+		echo "<h1 style='font-family: \"Helvetica Neue\", Arial, sans-serif;'>There was a problem accessing the database. Please check that your inputs are formatted properly.</h1>";
+		echo '<form method="POST">';
+		echo '<input type="submit" name="clearbtn" value="Go Back" id="clearbtn" />';
+		echo '</form>';
+		echo '<h3>Error show below: </h3>';
 	}
 	
 	$totalPages = calculatePages($sql, $conn);

@@ -83,11 +83,11 @@
                 # SQL statement changes unique for dates
                 $input = getPostValue($field);
                 if (substr($field, 2) == "beforedate") {
-			        if ($input != '') $sql = $sql . " AND DATE(date) <= '" . $input . "'";
+			        if ($input != '') $sql = $sql . " AND DATE(date) <= '$input'";
                 } elseif (substr($field, 2) == "afterdate") {
-			        if ($input != '') $sql = $sql . " AND DATE(date) >= '" . $input . "'";
+			        if ($input != '') $sql = $sql . " AND DATE(date) >= '$input'";
                 } else {
-			        $sql = $sql . " AND " . substr($field, 2) . " LIKE '%" . $input . "%'";
+			        $sql = $sql . " AND " . substr($field, 2) . " LIKE '%$input%'";
                 }
             }
         } elseif ($valueType == "session") {
@@ -97,13 +97,13 @@
                     # Keeps the m/d/Y format displayed in the field but converts it backend for sql
                     $dateTime = DateTime::createFromFormat("m/d/Y", $input);
                     if ($dateTime !== false) $input = $dateTime->format("Y-m-d");
-			        if ($input != '') $sql = $sql . " AND DATE(date) <= '" . $input . "'";
+			        if ($input != '') $sql = $sql . " AND DATE(date) <= '$input'";
                 } elseif (substr($field, 2) == "afterdate") {
                     $dateTime = DateTime::createFromFormat("m/d/Y", $input);
                     if ($dateTime !== false) $input = $dateTime->format("Y-m-d");
-			        if ($input != '') $sql = $sql . " AND DATE(date) >= '" . $input . "'";
+			        if ($input != '') $sql = $sql . " AND DATE(date) >= '$input'";
                 } else {
-			        $sql = $sql . " AND " . substr($field, 2) . " LIKE '%" . $input . "%'";
+			        $sql = $sql . " AND " . substr($field, 2) . " LIKE '%$input%'";
                 }
             }
         }
