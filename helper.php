@@ -156,7 +156,7 @@
         // Add option to go to a specific page below the numerical pages
         echo "<div class=\"go-form\">";
         echo "<form action=\"$site.php\" method=\"get\">";
-        echo "<input type=\"number\" name=\"page\" min=\"1\" max=\"{$totalPages}\" class=\"go-input\" placeholder=\"Go to page\">";
+        echo "<input style='width: 110px' type=\"number\" name=\"page\" min=\"1\" max=\"{$totalPages}\" class=\"go-input\" placeholder=\"Go to page\">";
         echo "<input type=\"submit\" value=\"Go\" class=\"go-btn\">";
         echo "</form>";
         echo "</div>";
@@ -258,6 +258,13 @@
         return $totalPages;
     }
 
+    /**
+     * Retrieve all emails using the $sql query. If there is an sql error, display error handling
+     * 
+     * @param object $conn Connection to database via mysqli
+     * @param string $sql The sql statement containing the filter(s), if any
+     * 
+     */
     function retrieveAllEmails($conn, $sql) {
         try {
             $info = array();
@@ -282,9 +289,20 @@
             echo '</form>';
             echo "</div>";
             echo "<br><br><br>";
-            echo '<h3>Error show below: </h3>';
+            echo '<h3>Error shown below: </h3>';
 
         }
     }
 
+    /**
+     * Render the html content from $template with $data
+     * 
+     * @param string $template The filename in templates/ to extract code from.
+     * @param array $data An associative array containing data for the template.
+     * 
+     */
+    function render($template, $data) {
+        extract($data);
+        include('templates/'.$template);
+    }
 ?>
