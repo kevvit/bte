@@ -1,5 +1,7 @@
 import imaplib
 import email
+import base64
+import quopri
 import os
 import chardet  # pip install chardet
 import MySQLdb  # pip install mysqlclient
@@ -65,6 +67,49 @@ def get_email_body(email_message):
             pass  # In case the content charset is not available
     return email_body
 
+def get_decoded_part(encoded_subject):
+    """
+    encoded_subject = email_message['subject']
+    decoded_subject_bytes, charset = decode_header(encoded_subject)[0]
+    if isinstance(decoded_subject_bytes, bytes):
+        decoded_subject = decoded_subject_bytes.decode(charset if charset else 'utf-8')
+    else:
+        decoded_subject = decoded_subject_bytes
+    
+    return email_message['subject']
+    """
+    decoded_parts = []
+    
+    # Iterate over each encoded part
+    for decoded_header_bytes, charset in decode_header(encoded_subject):
+        if isinstance(decoded_header_bytes, bytes):
+            # If the bytes are Quoted-Printable encoded, decode them
+            if charset and charset.lower() == 'utf-8':
+                try:
+                    decoded_header_bytes = quopri.decodestring(decoded_header_bytes)
+                except quopri.Error:
+                    pass
+
+            # Decode Base64 encoded parts
+            if charset and charset.lower() == 'utf-8' and decoded_header_bytes.startswith(b'=?utf-8?B?'):
+                try:
+                    base64_encoded_part = decoded_header_bytes[len(b'=?utf-8?B?'):-len(b'?=')]
+                    decoded_header_bytes = base64.b64decode(base64_encoded_part)
+                except base64.binascii.Error:
+                    pass
+
+        # Convert decoded bytes to string if needed
+        if isinstance(decoded_header_bytes, bytes):
+            decoded_part = decoded_header_bytes.decode(charset if charset else 'utf-8')
+        else:
+            decoded_part = decoded_header_bytes
+
+        decoded_parts.append(decoded_part)
+
+    # Concatenate multiple parts
+    decoded_header = ''.join(decoded_parts)
+    
+    return decoded_header
 
 config = configparser.ConfigParser()
 config.read("config.ini")
@@ -114,12 +159,13 @@ for uid in uids[0].split():
 
     # Extract necessary details like email address, subject, date, etc.
     email_id = email_message["Message-ID"]
-    email_subject = email_message["subject"]
+    email_subject = get_decoded_part(email_message['subject'])
     email_from = email_message["from"]
     email_date = email_message["date"]
     start_bracket = email_from.find("<")
     end_bracket = email_from.find(">")
     sendername = email_from[:start_bracket - 1]
+    sendername = get_decoded_part(sendername)
     senderaddr = email_from[start_bracket + 1:end_bracket]
 
 
