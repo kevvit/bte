@@ -2,8 +2,13 @@
     require_once 'helper.php';
     if (isset($_GET['id'])) {
         $conn = connSetup();
-        $emailuid = base64_decode($_GET['id']);
+        $id = $_GET['id'];
 
+        # "monitor" -> Opened from monitor page
+        # "service" -> Opened from service page
+        $source = substr($id, 0, 7);
+        $id = substr($id, 7);
+        $emailuid = base64_decode($id);
         # Find the email with the uid as decoded from the url
         $sql = "SELECT * FROM emails WHERE emailuid LIKE \"" . $emailuid . "%\"";
         $info = array();
@@ -28,7 +33,7 @@
             updateEmailType("Cancel", $conn, $emailuid, $info);
         } elseif (isset($_POST['saveNote'])) {
             $note_content = $_POST['note_content'];
-            $sql = "UPDATE emails SET note = ? WHERE emailuid LIKE '$emailuid%'";
+            $sql = "UPDATE emailsort SET note = ? WHERE emailuid LIKE '$emailuid%'";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("s", $note_content);
             $stmt->execute();
@@ -37,5 +42,5 @@
         header("Location: ". $currentUrl);
         exit();
     } 
-    render('email-detail.php', ['info' => $info]);
+    render('email-detail.php', ['info' => $info, 'source' => $source, 'conn' => $conn]);
 ?>

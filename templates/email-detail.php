@@ -18,20 +18,36 @@
                 echo "<h3> " . $info['sendername'] . "</h3>";
                 echo "<h3> " . $info['senderaddr'] . "</h3>";
                 echo "<h3> " . $info['date'] . "</h3>";
-                $existing_note_content = $info['note'];
-                    ?> 
+                $title = $info['title'];
+                $body = $info['body'];
+                if ($source == "service") {
+                    $emailuid = $info['emailuid'];
+                    $sql = "SELECT note FROM emailsort WHERE emailuid = '$emailuid'";
+                    $info = array();
+                    $result = $conn->query($sql);
+                    if ($result === false) {
+                        echo "Error: " . $sql . "<br>" . $conn->error."<br/>";
+                    } elseif ($result->num_rows > 0) {
+                        $info = $result->fetch_assoc();
+                    }
+                    $existing_note_content = $info['note'];
+                    
+            ?> 
                     <form method="post">
                         <textarea name="note_content" rows="5" cols="100"><?php echo $existing_note_content; ?></textarea>
                         <br>
                         <br>
                         <input type="submit" name="saveNote" value="Save Note">
                     </form>
+            <?php
+                }
+            ?>
                     <form name="buttonForm" method="POST">
                         <input style = "background-color: #ccffcc; color: #333" type="submit" name="markrefund" value="Mark as Refund" id="markrefund" />
                         <input style = "background-color: #ff9999; color: #333" type="submit" name="markcancel" value="Mark as Cancel" id="markcancel" />
                     </form>
                     <?php
-                    echo "<title>" . $info['title'] . "</title>";
+                    echo "<title>" . $title . "</title>";
                     echo "</div>";
             ?>
             <style>
@@ -57,7 +73,7 @@
                 }
             </style>
             <tr>
-                <td class="center"><?= "<br><br><br>" . str_replace("<br />", "", nl2br($info['body'])) . "<br><br><br>" ?></td>
+                <td class="center"><?= "<br><br><br>" . str_replace("<br />", "", nl2br($body)) . "<br><br><br>" ?></td>
             </tr>
         </table>
     </body>

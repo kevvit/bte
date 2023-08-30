@@ -70,7 +70,7 @@
 				<?php
 					$encoded_uid = base64_encode($row['emailuid']);
 				?>
-				<td class="center"><a href="view_email.php?id=<?= $encoded_uid ?>" target="_blank"><?= $row['title'] ?></a></td>
+				<td class="center"><a href="view_email.php?id=monitor<?= $encoded_uid ?>" target="_blank"><?= $row['title'] ?></a></td>
 				<td class="center" bgcolor="<?= $colour ?>"><?= $row['date'] ?></td>
 				<td style="padding: 0"><input type="checkbox" class="modern-checkbox" name="emailCheckbox"></td>
 			</tr>
