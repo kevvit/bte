@@ -21,17 +21,6 @@
                 $title = $info['title'];
                 $body = $info['body'];
                 if ($source == "service") {
-                    $emailuid = $info['emailuid'];
-                    $sql = "SELECT note FROM emailsort WHERE emailuid = '$emailuid'";
-                    $info = array();
-                    $result = $conn->query($sql);
-                    if ($result === false) {
-                        echo "Error: " . $sql . "<br>" . $conn->error."<br/>";
-                    } elseif ($result->num_rows > 0) {
-                        $info = $result->fetch_assoc();
-                    }
-                    $existing_note_content = $info['note'];
-                    
             ?> 
                     <form method="post">
                         <textarea name="note_content" rows="5" cols="100"><?php echo $existing_note_content; ?></textarea>

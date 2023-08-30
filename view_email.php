@@ -9,6 +9,19 @@
         $source = substr($id, 0, 7);
         $id = substr($id, 7);
         $emailuid = base64_decode($id);
+        $existing_note_content = '';
+        # If opened from service page, implement note system
+        if ($source == "service") {
+            $sql = "SELECT note FROM emailsort WHERE emailuid = '$emailuid'";
+            $info = array();
+            $result = $conn->query($sql);
+            if ($result === false) {
+                echo "Error: " . $sql . "<br>" . $conn->error."<br/>";
+            } elseif ($result->num_rows > 0) {
+                $info = $result->fetch_assoc();
+            }
+            $existing_note_content = $info['note'];
+        }
         # Find the email with the uid as decoded from the url
         $sql = "SELECT * FROM emails WHERE emailuid LIKE \"" . $emailuid . "%\"";
         $info = array();
@@ -42,5 +55,6 @@
         header("Location: ". $currentUrl);
         exit();
     } 
-    render('email-detail.php', ['info' => $info, 'source' => $source, 'conn' => $conn]);
+
+    render('email-detail.php', ['info' => $info, 'source' => $source, 'existing_note_content' => $existing_note_content]);
 ?>
